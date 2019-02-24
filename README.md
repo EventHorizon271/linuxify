@@ -1,6 +1,6 @@
 # linuxify
 
-Transparently transform the macOS CLI into a fresh GNU/Linux CLI experience by
+Transparently transform the Crostini CLI into a fresh GNU/Linux CLI experience by
 
 - installing missing GNU programs
 - updating outdated GNU programs
@@ -13,7 +13,7 @@ as easily as the install.
 ## Install
 
 ```bash
-$ git clone git@github.com:fabiomaia/linuxify.git
+$ git clone git@github.com:EventHorizon271/linuxify.git
 $ cd linuxify/
 $ chmod +x linuxify.sh
 $ ./linuxify.sh install
