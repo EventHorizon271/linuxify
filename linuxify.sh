@@ -43,10 +43,16 @@ all_packages=(
     $backport_packages
 )
 
-oh-my-zsh() {
+install_oh-my-zsh() {
     mkdir ~/Downloads
     cd ~/Downloads
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+}
+
+configure_git() {
+    git config --global user.email $2
+    git config --global user.name $3
+    git config --global credential.helper cache
 }
 
 install() {
@@ -66,7 +72,10 @@ install() {
     sudo update-command-not-found
 
     # Install Oh-My-Zsh
-    oh-my-zsh;
+    install_oh-my-zsh;
+
+    # Modify Configurations
+    configure_git;
 }
 
 uninstall() {
@@ -87,7 +96,7 @@ info() {
 }
 
 help() {
-  echo "usage: linuxify.sh [-h] [command]";
+  echo "usage: linuxify.sh [-h] [command] [git_email] [git_name]";
   echo ""
   echo "valid commands:"
   echo "  install    install GNU/Linux utilities"
@@ -99,7 +108,7 @@ help() {
 }
 
 main() {
-    if [ $# -eq 1 ]; then
+    if [ $# -eq 3 ]; then
         case $1 in
             "install") install ;;
             "uninstall") uninstall ;;
