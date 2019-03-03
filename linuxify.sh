@@ -2,50 +2,91 @@
 
 set -euo pipefail
 
-linuxify_check_os() {
+check_os() {
   if ! [[ "$OSTYPE" =~ linux-gnu ]]; then
       echo "This is meant to be run on Linux only"
       exit
   fi
 }
 
-linuxify_update_os() {
-    sudo apt update
-    sudo apt upgrade
-    sudo apt dist-upgrade
+change_passwords() {
+    echo "Changing root password.."
+    sudo passwd root
+
+    echo "Changing password for $(whoami).."
+    sudo passwd $(whoami)
 }
 
-linuxify_packages=(
+add_sources() {
+    echo 'deb http://ftp.debian.org/debian stretch-backports main' | sudo tee /etc/apt/sources.list.d/stretch-backports.list
+}
+
+update_os() {
+    sudo apt-get update
+    sudo apt-get full-upgrade
+}
+
+regular_packages=(
     apt-utils
     apt-file
     command-not-found
+    zsh
+    fonts-powerline
 )
 
-linuxify_install() {
-    linuxify_check_os;
-    linuxify_update_os;
+backport_packages=(
+    tmux
+)
 
-    # Install all packages
-    sudo apt install -y ${linuxify_packages[@]}
+all_packages=(
+    $regular_packages
+    $backport_packages
+)
+
+oh-my-zsh() {
+    mkdir ~/Downloads
+    cd ~/Downloads
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 }
 
-linuxify_uninstall() {
-    linuxify_check_os;
+install() {
+    check_os;
+    change_passwords;
+    add_sources;
+    update_os;
 
-    sudo apt uninstall ${linuxify_packages[@]}
+    # Install regular packages
+    sudo apt-get install -y ${regular_packages[@]}
+
+    # Install backport packages
+    sudo apt-get install -t stretch-backports -y ${backport_packages[@]}
+
+    # Update apt-file and command-not-found
+    sudo apt-file update
+    sudo update-command-not-found
+
+    # Install Oh-My-Zsh
+    oh-my-zsh;
 }
 
-linuxify_info() {
-    linuxify_check_os;
+uninstall() {
+    check_os;
 
-    for (( i=0; i<${#linuxify_packages[@]}; i++ )); do
+    sudo apt-get uninstall ${all_packages[@]}
+    sudo apt-get autoremove
+}
+
+info() {
+    check_os;
+
+    for (( i=0; i<${#all_packages[@]}; i++ )); do
         echo "==============================================================================================================================="
         echo
-        sudo apt show ${linuxify_packages[i]}
+        sudo apt-cache show -a ${all_packages[i]}
     done
 }
 
-linuxify_help() {
+help() {
   echo "usage: linuxify.sh [-h] [command]";
   echo ""
   echo "valid commands:"
@@ -57,19 +98,19 @@ linuxify_help() {
   echo "  -h, --help  show this help message and exit"
 }
 
-linuxify_main() {
+main() {
     if [ $# -eq 1 ]; then
         case $1 in
-            "install") linuxify_install ;;
-            "uninstall") linuxify_uninstall ;;
-            "info") linuxify_info ;;
-            "-h") linuxify_help ;;
-            "--help") linuxify_help ;;
+            "install") install ;;
+            "uninstall") uninstall ;;
+            "info") info ;;
+            "-h") help ;;
+            "--help") help ;;
         esac
     else
-        linuxify_help;
+        help;
         exit
     fi
 }
 
-linuxify_main "$@"
+main "$@"
