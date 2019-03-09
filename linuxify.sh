@@ -10,11 +10,13 @@ check_os() {
 }
 
 change_passwords() {
+    echo
     echo "Changing root password.."
     sudo passwd root
-
+    echo
     echo "Changing password for $(whoami).."
     sudo passwd $(whoami)
+    echo
 }
 
 add_sources() {
@@ -23,11 +25,10 @@ add_sources() {
 
 update_os() {
     sudo apt-get update
-    sudo apt-get full-upgrade
+    sudo apt-get -y full-upgrade
 }
 
 regular_packages=(
-    apt-utils
     apt-file
     command-not-found
     zsh
@@ -60,6 +61,9 @@ install() {
     change_passwords;
     add_sources;
     update_os;
+
+    # Install apt-utils
+    sudo apt-get install -y apt-utils
 
     # Install regular packages
     sudo apt-get install -y ${regular_packages[@]}
