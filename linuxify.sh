@@ -60,10 +60,10 @@ install() {
     check_os;
     change_passwords;
     add_sources;
-    update_os;
 
-    # Install apt-utils
+    # Install apt-utils and update existing packages
     sudo apt-get install -y apt-utils
+    update_os;
 
     # Install regular packages
     sudo apt-get install -y ${regular_packages[@]}
