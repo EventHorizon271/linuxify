@@ -3,10 +3,17 @@
 set -euo pipefail
 
 check_os() {
-  if ! [[ "$OSTYPE" =~ linux-gnu ]]; then
-      echo "This is meant to be run on Linux only"
-      exit
-  fi
+    if ! [[ $OSTYPE =~ linux-gnu ]]; then
+        echo "This is meant to be run on Linux only"
+        exit 1
+    fi
+}
+
+check_root() {
+    if [[ $(whoami) == "root" ]]; then
+        echo "This should not be run as root"
+	    exit 1
+    fi
 }
 
 change_passwords() {
@@ -28,7 +35,7 @@ update_os() {
     sudo apt-get -y full-upgrade
 }
 
-regular_packages=(
+main_packages=(
     apt-file
     command-not-found
     zsh
@@ -40,58 +47,58 @@ backport_packages=(
 )
 
 all_packages=(
-    $regular_packages
+    $main_packages
     $backport_packages
 )
 
 install_oh-my-zsh() {
-    mkdir ~/Downloads
-    cd ~/Downloads
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 }
 
+install_vscode() {
+    wget --quiet --output-document=./vscode.deb 'https://go.microsoft.com/fwlink/?LinkID=760868'
+    sudo apt-get install -y ./vscode.deb
+}
+
 configure_git() {
-    git config --global user.email $2
-    git config --global user.name $3
+    read -p "Email address: " email
+    read -p "Full name: " full_name
+    git config --global user.email $email
+    git config --global user.name $full_name
     git config --global credential.helper cache
 }
 
-install() {
-    check_os;
-    change_passwords;
-    add_sources;
+install_packages() {
+    mkdir ~/tmp
+    cd ~/tmp
 
-    # Install apt-utils and update existing packages
+    # Prerequisites
     sudo apt-get install -y apt-utils
-    update_os;
 
-    # Install regular packages
-    sudo apt-get install -y ${regular_packages[@]}
+    # Install packages found in main repository
+    sudo apt-get install -y ${main_packages[@]}
 
-    # Install backport packages
+    # Install packages found in backports repository
     sudo apt-get install -t stretch-backports -y ${backport_packages[@]}
 
-    # Update apt-file and command-not-found
+    # Update packages
     sudo apt-file update
     sudo update-command-not-found
 
-    # Install Oh-My-Zsh
-    install_oh-my-zsh;
-
-    # Modify Configurations
-    configure_git;
+    # Install packages not found in repositories
+    #install_oh-my-zsh
+    install_vscode
+    
+    cd ~
+    rm -rf ~/tmp
 }
 
-uninstall() {
-    check_os;
-
+uninstall_packages() {
     sudo apt-get uninstall ${all_packages[@]}
     sudo apt-get autoremove
 }
 
 info() {
-    check_os;
-
     for (( i=0; i<${#all_packages[@]}; i++ )); do
         echo "==============================================================================================================================="
         echo
@@ -100,30 +107,54 @@ info() {
 }
 
 help() {
-  echo "usage: linuxify.sh [-h] [command] [git_email] [git_name]";
+  echo "Usage: linuxify.sh [command]";
   echo ""
-  echo "valid commands:"
-  echo "  install    install GNU/Linux utilities"
-  echo "  uninstall  uninstall GNU/Linux utilities"
-  echo "  info       show info on GNU/Linux utilities"
-  echo ""
-  echo "optional arguments:"
-  echo "  -h, --help  show this help message and exit"
+  echo "Valid commands:"
+  echo "  --install     install GNU/Linux utilities"
+  echo "  --uninstall   uninstall GNU/Linux utilities"
+  echo "  --packages    show info on GNU/Linux utilities"
+  exit 1
 }
 
 main() {
-    if [ $# -eq 3 ]; then
-        case $1 in
-            "install") install ;;
-            "uninstall") uninstall ;;
-            "info") info ;;
-            "-h") help ;;
-            "--help") help ;;
-        esac
+    check_os
+    check_root
+
+    if [[ $# -ne 1 ]]; then
+	    help
     else
-        help;
-        exit
+        case $1 in
+            "install") ;&
+            "--install") ;&
+            "-i")
+                configure_git
+                change_passwords
+                #add_sources
+                update_os
+                install_packages
+                ;;
+            "uninstall") ;&
+            "--uninstall") ;&
+            "-u") 
+                uninstall_packages 
+                ;;
+            "packages") ;&
+            "--packages") ;&
+            "-p")
+                info 
+                ;;
+            "help") ;&
+            "--help") ;&
+            "-h")
+                help
+                ;;
+	        *)
+                echo "Invalid command"
+                help
+                ;;
+        esac
     fi
 }
 
 main "$@"
+exit 0
