@@ -7,6 +7,7 @@ main_packages=(
     command-not-found
     fonts-powerline
     locate
+    mesa-utils
     zsh
 )
 
@@ -70,7 +71,7 @@ show_usage() {
 }
 
 install_packages() {
-    local working_directory="~/tmp"
+    local working_directory="$HOME/tmp"
 
     # Pre-install configuration
     mkdir "$working_directory"
@@ -151,10 +152,11 @@ change_passwords() {
 
 configure_git() {
     show_message "Configuring Git"
+    while read -r -t 0; do read -r; done
     read -p "Email address: " local email
     read -p "Full name: " local full_name
-    git config --global user.email "$email"
-    git config --global user.name "$full_name"
+    git config --global user.email $email
+    git config --global user.name $full_name
     git config --global credential.helper cache
 }
 
@@ -238,8 +240,8 @@ create_icon() {
 }
 
 configure_tilix() {
-    printf '\nif [ $TILIX_ID ] || [ $VTE_VERSION ]; then\n    source/etc/profile.d/vte.sh\nfi\n' | sudo tee -a ~/.bashrc > /dev/null 2>&1
-    printf '\nif [ $TILIX_ID ] || [ $VTE_VERSION ]; then\n    source/etc/profile.d/vte.sh\nfi\n' | sudo tee -a ~/.zshrc > /dev/null 2>&1
+    printf '\nif [ $TILIX_ID ] || [ $VTE_VERSION ]; then\n    source/etc/profile.d/vte.sh\nfi\n' | sudo tee -a "$HOME/.bashrc" > /dev/null 2>&1
+    printf '\nif [ $TILIX_ID ] || [ $VTE_VERSION ]; then\n    source/etc/profile.d/vte.sh\nfi\n' | sudo tee -a "$HOME/.zshrc" > /dev/null 2>&1
     sudo ln -s /etc/profile.d/vte-2.91.sh /etc/profile.d/vte.sh
 }
 
@@ -264,7 +266,7 @@ install_firefox() {
     local url="https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=en-US"
 
     download_package "$name" "$filepath" "$url"
-    install_package "$name" "$filepath" ~/
+    install_package "$name" "$filepath" "$HOME"
     create_icon "$iconpath" "$name" "$comment" "$image" "$exec" "$type" "$categories"
 }
 
