@@ -12,6 +12,7 @@ main_packages=(
 )
 
 backport_packages=(
+    remmina
     tilix
     tmux
 )
