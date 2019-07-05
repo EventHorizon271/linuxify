@@ -240,8 +240,8 @@ create_icon() {
 }
 
 configure_tilix() {
-    printf '\nif [ $TILIX_ID ] || [ $VTE_VERSION ]; then\n    source/etc/profile.d/vte.sh\nfi\n' | sudo tee -a "$HOME/.bashrc" > /dev/null 2>&1
-    printf '\nif [ $TILIX_ID ] || [ $VTE_VERSION ]; then\n    source/etc/profile.d/vte.sh\nfi\n' | sudo tee -a "$HOME/.zshrc" > /dev/null 2>&1
+    printf '\nif [ $TILIX_ID ] || [ $VTE_VERSION ]; then\n    source /etc/profile.d/vte.sh\nfi\n' | sudo tee -a "$HOME/.bashrc" > /dev/null 2>&1
+    printf '\nif [ $TILIX_ID ] || [ $VTE_VERSION ]; then\n    source /etc/profile.d/vte.sh\nfi\n' | sudo tee -a "$HOME/.zshrc" > /dev/null 2>&1
     sudo ln -s /etc/profile.d/vte-2.91.sh /etc/profile.d/vte.sh
 }
 
