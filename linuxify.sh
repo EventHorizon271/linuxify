@@ -5,10 +5,19 @@ set -euo pipefail
 main_packages=(
     apt-file
     command-not-found
-    fonts-powerline
     locate
     mesa-utils
+    gimp
+    lxappearance
+    fonts-powerline
     zsh
+
+    cmake
+    pkg-config
+    libfreetype6-dev
+    libfontconfig1-dev
+    libxcb-xfixes0-dev
+    python3
 )
 
 backport_packages=(
@@ -24,7 +33,7 @@ all_packages=(
 
 main() {
     if [[ $# -ne 1 ]]; then
-	    show_usage
+        show_usage
     fi
 
     check_os
@@ -89,10 +98,14 @@ install_packages() {
     sudo updatedb
 
     # Install packages not found in repositories
+    install_rust
+    install_alacritty
     install_discord
+    install_slack
     install_firefox
     install_oh-my-zsh
     install_vscode
+    install_nomachine
 
     # Configure packages
     configure_tilix
@@ -161,18 +174,18 @@ configure_git() {
     git config --global credential.helper cache
 }
 
-configure_os() {
-    configure_sources
-    configure_environment
-}
+#configure_os() {
+#    configure_sources
+#    configure_environment
+#}
 
-# configure_sources() {
-#     #TODO: Add contrib and non-free to repos
-# }
+#configure_sources() {
+#    #TODO: Add contrib and non-free to repos
+#}
 
-# configure_environment() {
-#     #TODO: Add aliases to .bashrc and .zshrc
-# }
+#configure_environment() {
+#    #TODO: Add aliases to .bashrc and .zshrc
+#}
 
 update_os() {
     show_message "Updating OS"
@@ -246,10 +259,35 @@ configure_tilix() {
     sudo ln -s /etc/profile.d/vte-2.91.sh /etc/profile.d/vte.sh
 }
 
+install_rust() {
+    curl https://sh.rustup.rs -sSf | sh
+    source $HOME/.cargo/env
+}
+
+install_alacritty() {
+    git clone https://github.com/jwilm/alacritty.git
+    cd alacritty
+    cargo build --release
+    sudo cp target/release/alacritty /usr/local/bin # or anywhere else in $PATH
+    sudo cp extra/logo/alacritty-term.svg /usr/share/pixmaps/Alacritty.svg
+    sudo desktop-file-install extra/linux/alacritty.desktop
+    sudo update-desktop-database
+    cd ..
+}
+
 install_discord() {
     local name="Discord"
     local filepath=./discord.deb
     local url="https://discordapp.com/api/download?platform=linux&format=deb"
+
+    download_package "$name" "$filepath" "$url"
+    install_package "$name" "$filepath"
+}
+
+install_slack() {
+    local name="Slack"
+    local filepath=./slack.deb
+    local url="https://downloads.slack-edge.com/linux_releases/slack-desktop-4.0.1-amd64.deb"
 
     download_package "$name" "$filepath" "$url"
     install_package "$name" "$filepath"
@@ -278,6 +316,15 @@ install_oh-my-zsh() {
 install_vscode() {
     wget --quiet --output-document=./vscode.deb "https://go.microsoft.com/fwlink/?LinkID=760868"
     sudo apt-get install -y ./vscode.deb
+}
+
+install_nomachine() {
+    local name="NoMachine"
+    local filepath=./nomachine.deb
+    local url="https://download.nomachine.com/download/6.7/Linux/nomachine_6.7.6_11_amd64.deb"
+
+    download_package "$name" "$filepath" "$url"
+    install_package "$name" "$filepath"``
 }
 
 main "$@"
