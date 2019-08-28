@@ -2,33 +2,38 @@
 
 set -euo pipefail
 
-main_packages=(
+packages=(
+    # Command-Line Utilities
     apt-file
     command-not-found
-    locate
-    mesa-utils
-    gimp
-    lxappearance
     fonts-powerline
+    locate
     zsh
 
+    # GPU
+    mesa-utils
+
+    # Gimp
+    gimp
+    lxappearance
+
+    # Build Dependencies
     cmake
     pkg-config
     libfreetype6-dev
     libfontconfig1-dev
     libxcb-xfixes0-dev
-    python3
 )
 
-backport_packages=(
+backports=(
     remmina
     tilix
     tmux
 )
 
 all_packages=(
-    ${main_packages[@]}
-    ${backport_packages[@]}
+    ${packages[@]}
+    ${backports[@]}
 )
 
 main() {
@@ -89,13 +94,8 @@ install_packages() {
 
     # Install packages
     sudo apt-get install -y apt-utils
-    sudo apt-get install -y ${main_packages[@]}
-    sudo apt-get install -t stretch-backports -y ${backport_packages[@]}
-
-    # Update packages
-    sudo apt-file update
-    sudo update-command-not-found
-    sudo updatedb
+    sudo apt-get install -y ${packages[@]}
+    sudo apt-get install -t stretch-backports -y ${backports[@]}
 
     # Install packages not found in repositories
     install_rust
@@ -109,6 +109,11 @@ install_packages() {
 
     # Configure packages
     configure_tilix
+
+    # Update packages
+    sudo apt-file update
+    sudo update-command-not-found
+    sudo updatedb
     
     # Post-install cleanup
     rm -rf "$working_directory"
@@ -121,9 +126,11 @@ uninstall_packages() {
 }
 
 show_packages() {
-    for (( i=0; i<${#all_packages[@]}; i++ )); do
-        show_message "${all_packages[i]}"
-        sudo apt-cache show -a ${all_packages[i]}
+    local IFS=$'\n'
+    local sorted_packages=($(sort <<<"${all_packages[*]}")); 
+    for (( i=0; i<${#sorted_packages[@]}; i++ )); do
+	show_message "${sorted_packages[i]}"
+	sudo apt-cache show ${sorted_packages[i]}
     done
 }
 
@@ -165,12 +172,15 @@ change_passwords() {
 }
 
 configure_git() {
+    local IFS=
+    local email=
+    local full_name=
     show_message "Configuring Git"
-    while read -r -t 0; do read -r; done
-    read -p "Email address: " local email
-    read -p "Full name: " local full_name
-    git config --global user.email $email
-    git config --global user.name $full_name
+    #while read -r -t 0; do read -r; done
+    read -r -p "Email address: " email
+    read -r -p "Full name: " full_name
+    git config --global user.email "$email"
+    git config --global user.name "$full_name"
     git config --global credential.helper cache
 }
 
