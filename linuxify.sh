@@ -290,6 +290,7 @@ install_alacritty() {
     sudo cp extra/logo/alacritty-term.svg /usr/share/pixmaps/Alacritty.svg
     sudo desktop-file-install extra/linux/alacritty.desktop
     sudo update-desktop-database
+    sed -i 's/^Exec=alacritty$/Exec=env WAYLAND_DISPLAY= alacritty/g' /usr/share/applications/alacritty.desktop
     cd ..
 }
 
@@ -329,6 +330,7 @@ install_firefox() {
 
 install_oh-my-zsh() {
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+    sed -i 's/^ZSH_THEME="robbyrussel"/ZSH_THEME="agnoster"/g' $HOME/.zshrc
 }
 
 install_vscode() {
