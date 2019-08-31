@@ -114,6 +114,7 @@ install_packages() {
     install_oh-my-zsh
     install_vscode
     install_nomachine
+    install_tldr
 
     # Configure packages
     configure_tilix
@@ -345,6 +346,11 @@ install_nomachine() {
 
     download_package "$name" "$filepath" "$url"
     install_package "$name" "$filepath"``
+}
+
+install_tldr() {
+    curl -o "/usr/local/bin/tldr" https://raw.githubusercontent.com/raylee/tldr/master/tldr
+    chmod +x "/usr/local/bin/tldr"
 }
 
 main "$@"
