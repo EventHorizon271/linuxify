@@ -2,15 +2,17 @@
 
 set -euo pipefail
 
-packages=(
+packages_main=(
     # Command-Line Utilities
     apt-file
     command-not-found
     fonts-powerline
+    htop
     locate
+    neovim
     zsh
 
-    # GPU
+    # GPU Utilities
     mesa-utils
 
     # Gimp
@@ -25,15 +27,19 @@ packages=(
     libxcb-xfixes0-dev
 )
 
-backports=(
+packages_backports=(
     remmina
     tilix
     tmux
 )
 
-all_packages=(
-    ${packages[@]}
-    ${backports[@]}
+packages_uninstall=(
+    vim
+)
+
+packages_all=(
+    ${packages_main[@]}
+    ${packages_backports[@]}
 )
 
 main() {
@@ -94,8 +100,10 @@ install_packages() {
 
     # Install packages
     sudo apt-get install -y apt-utils
-    sudo apt-get install -y ${packages[@]}
-    sudo apt-get install -t stretch-backports -y ${backports[@]}
+    sudo apt-get remove -y ${packages_uninstall[@]}
+    sudo apt-get autoremove
+    sudo apt-get install -y ${packages_main[@]}
+    sudo apt-get install -t stretch-backports -y ${packages_backports[@]}
 
     # Install packages not found in repositories
     install_rust
@@ -121,16 +129,16 @@ install_packages() {
 
 uninstall_packages() {
     show_message "Uninstalling Packages"
-    sudo apt-get uninstall ${all_packages[@]}
+    sudo apt-get uninstall ${packages_all[@]}
     sudo apt-get autoremove
 }
 
 show_packages() {
     local IFS=$'\n'
-    local sorted_packages=($(sort <<<"${all_packages[*]}")); 
-    for (( i=0; i<${#sorted_packages[@]}; i++ )); do
-	show_message "${sorted_packages[i]}"
-	sudo apt-cache show ${sorted_packages[i]}
+    local packages_sorted=($(sort <<<"${packages_all[*]}")); 
+    for (( i=0; i<${#packages_sorted[@]}; i++ )); do
+	show_message "${packages_sorted[i]}"
+	sudo apt-cache show ${packages_sorted[i]}
     done
 }
 
