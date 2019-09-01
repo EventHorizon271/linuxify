@@ -281,11 +281,11 @@ configure_tilix() {
 }
 
 install_rust() {
-    curl https://sh.rustup.rs -sSf | sh
+    curl -sSf https://sh.rustup.rs | sh
     source "$HOME/.cargo/env"
 }
 
-install golang() {
+install_golang() {
     local go_version=1.12.9
     local shell_export='\n# GoLang\nexport PATH=$PATH:/usr/local/go/bin\n'
     curl -o go.tar.gz "$(https://dl.google.com/go/go1.12.9.linux-amd64.tar.gz)"
