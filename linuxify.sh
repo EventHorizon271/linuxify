@@ -107,6 +107,8 @@ install_packages() {
 
     # Install packages not found in repositories
     install_rust
+    install_golang
+    install_gotop
     install_alacritty
     install_discord
     install_slack
@@ -275,12 +277,30 @@ create_icon() {
 configure_tilix() {
     printf '\nif [ $TILIX_ID ] || [ $VTE_VERSION ]; then\n    source /etc/profile.d/vte.sh\nfi\n' | sudo tee -a "$HOME/.bashrc" > /dev/null 2>&1
     printf '\nif [ $TILIX_ID ] || [ $VTE_VERSION ]; then\n    source /etc/profile.d/vte.sh\nfi\n' | sudo tee -a "$HOME/.zshrc" > /dev/null 2>&1
-    sudo ln -s /etc/profile.d/vte-2.91.sh /etc/profile.d/vte.sh
+    sudo ln -s "/etc/profile.d/vte-2.91.sh /etc/profile.d/vte.sh"
 }
 
 install_rust() {
     curl https://sh.rustup.rs -sSf | sh
-    source $HOME/.cargo/env
+    source "$HOME/.cargo/env"
+}
+
+install golang() {
+    local go_version=1.12.9
+    local shell_export='\n# GoLang\nexport PATH=$PATH:/usr/local/go/bin\n'
+    curl -o go.tar.gz "$(https://dl.google.com/go/go1.12.9.linux-amd64.tar.gz)"
+    tar -C /usr/local -xzf go.tar.gz
+    printf $shell_export | sudo tee -a "$HOME/.bashrc" > /dev/null 2>&1
+    printf $shell_export | sudo tee -a "$HOME/.zshrc" > /dev/null 2>&1
+    source "$HOME/.profile"
+}
+
+install_gotop() {
+    git clone --depth 1 https://github.com/cjbassi/gotop
+    cd gotop
+    sh download.sh
+    mv ./gotop /usr/local/bin
+    cd ..
 }
 
 install_alacritty() {
