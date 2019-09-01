@@ -3,21 +3,17 @@
 set -euo pipefail
 
 packages_main=(
-    # Command-Line Utilities
     apt-file
     command-not-found
+    cros-adapta
     fonts-powerline
+    gimp
     htop
     locate
+    lxappearance
+    mesa-utils
     neovim
     zsh
-
-    # GPU Utilities
-    mesa-utils
-
-    # Gimp
-    gimp
-    lxappearance
 
     # Build Dependencies
     cmake
