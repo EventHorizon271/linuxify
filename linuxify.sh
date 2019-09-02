@@ -101,9 +101,11 @@ install_packages() {
     sudo apt-get install -y ${packages_main[@]}
     sudo apt-get install -t stretch-backports -y ${packages_backports[@]}
 
-    # Install packages not found in repositories
-    install_rust
+    # Install Developer packages
     install_golang
+    install_rust
+
+    # Install packages not found in repositories
     install_gotop
     install_alacritty
     install_discord
@@ -211,42 +213,56 @@ update_os() {
 }
 
 download_package() {
-    if [[ $# -ne 3 ]] && ([[ -z "${1-}" ]] || [[ -z "${2-}" ]] || [[ -z "${3-}" ]]); then
+    if [[ $# -ne 3 ]]; then
         printf "Invalid download parameters\n"
         return 1
     fi
 
     local name="$1"
-    local filepath="$2"
+    local package="$2"
     local url="$3"
 
-    show_message "Downloading $name"
-    wget --quiet --output-document="$filepath" "$url"
-    
+    printf "Downloading $name...\n"
+    wget --output-document="$package" "$url"
+}
+
+download_source() {
+    if [[ $# -lt 2 ]] || [[ $# -gt 3 ]]; then
+        printf "Invalid download source parameters\n"
+    fi
+
+    local name="$1"
+    local url="$2"
+    local depth="1"
+    if [[ -n "${3-}" ]]; then
+        depth="$3"
+    fi
+
+    printf "Downloading $name...\n"
+    git clone --depth "$depth" "$url"
     printf "...Done.\n"
 }
 
 install_package() {
-    if [[ $# -lt 2 ]] || [[ $# -gt 3 ]]; then
+    if [[ $# -lt 3 ]] || [[ $# -gt 4 ]]; then
         printf "Invalid install parameters\n"
         return 1
     fi
 
     local name="$1"
     local package="$2"
-
-    if [[ $filepath != *.deb ]] && [[ -n "${3-}" ]]; then
-        local filepath="$3"
+    local url="$3"
+    if [[ -n "${4-}" ]]; then
+        local directory="$4"
     fi
-    
+
     show_message "Installing $name"
+    download_package "$name" "$package" "$url"
     case "$package" in
         *.deb) sudo apt-get install -y "$package" ;;
-        *.tar.bz2) tar -xjf "$package" -C "$filepath" ;;
+        *.tar.bz2) tar -xjf "$package" -C "$directory" ;;
         *) printf "Package type not supported\n" ;;
     esac
-    
-    printf "...Done.\n"
 }
 
 create_icon() {
@@ -277,33 +293,59 @@ configure_tilix() {
 }
 
 install_rust() {
-    curl -sSf https://sh.rustup.rs | sh
-    source "$HOME/.cargo/env"
+    local name="Rust"
+    local url="https://sh.rustup.rs"
+    local filepath="$HOME/.cargo/env"
+
+    show_message "Installing $name"
+    curl -sSf "$url" | sh
+    source "$filepath"
 }
 
-install_golang() {
-    local go_version=1.12.9
-    local shell_export='\n# GoLang\nexport PATH=$PATH:/usr/local/go/bin\n'
-    curl -o go.tar.gz "$(https://dl.google.com/go/go1.12.9.linux-amd64.tar.gz)"
-    tar -C /usr/local -xzf go.tar.gz
+install_go() {
+    local name="Go"
+    local version=1.12.9
+    local package="go.$version.tar.gz"
+    local url="https://dl.google.com/go/go$version.linux-amd64.tar.gz"
+    local directory="/usr/local"
+    local filepath="$HOME/.profile"
+    local shell_export='\n# Go\nexport PATH=$PATH:/usr/local/go/bin\n'
+
+    show_message "Installing $name"
+    download_package "$name" "./$package" "$url"
+    tar -C "$directory" -xzf "./$package"
     printf $shell_export | sudo tee -a "$HOME/.bashrc" > /dev/null 2>&1
     printf $shell_export | sudo tee -a "$HOME/.zshrc" > /dev/null 2>&1
-    source "$HOME/.profile"
+    source "$filepath"
 }
 
 install_gotop() {
-    git clone --depth 1 https://github.com/cjbassi/gotop
-    cd gotop
-    sh download.sh
-    mv ./gotop /usr/local/bin
+    local name="GoTop"
+    local package="gotop"
+    local installer="./download.sh"
+    local url="https://github.com/cjbassi/gotop"
+    local directory="/usr/local/bin"
+    local depth="1"
+
+    show_message "Installing $name"
+    download_source "$name" "$url" "$depth"
+    cd "$package"
+    sh "$installer"
+    mv "./$package" "$directory"
     cd ..
 }
 
 install_alacritty() {
-    git clone https://github.com/jwilm/alacritty.git
-    cd alacritty
+    local name="Alacritty"
+    local package="alacritty"
+    local url="https://github.com/jwilm/alacritty.git"
+    local directory="/usr/local/bin"
+
+    show_message "Installing $name"
+    download_source "$name" "$url"
+    cd "$package"
     cargo build --release
-    sudo cp target/release/alacritty /usr/local/bin # or anywhere else in $PATH
+    sudo cp target/release/alacritty /usr/local/bin
     sudo cp extra/logo/alacritty-term.svg /usr/share/pixmaps/Alacritty.svg
     sudo desktop-file-install extra/linux/alacritty.desktop
     sudo update-desktop-database
@@ -313,60 +355,71 @@ install_alacritty() {
 
 install_discord() {
     local name="Discord"
-    local filepath=./discord.deb
+    local package="discord.deb"
     local url="https://discordapp.com/api/download?platform=linux&format=deb"
 
-    download_package "$name" "$filepath" "$url"
-    install_package "$name" "$filepath"
+    install_package "$name" "./$package" "$url"
 }
 
 install_slack() {
     local name="Slack"
-    local filepath=./slack.deb
+    local package="slack.deb"
     local url="https://downloads.slack-edge.com/linux_releases/slack-desktop-4.0.1-amd64.deb"
 
-    download_package "$name" "$filepath" "$url"
-    install_package "$name" "$filepath"
+    install_package "$name" "./$package" "$url"
 }
 
 install_firefox() {
     local name="Firefox"
+    local package="firefox.tar.bz2"
+    local url="https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=en-US"
+    local directory="$HOME"
+
     local comment="Browse the World Wide Web"
     local image="/home/$(whoami)/firefox/browser/chrome/icons/default/default128.png"
     local exec="env MOZ_USE_XINPUT2=1 /home/$(whoami)/firefox/firefox %u"
     local type="Application"
     local categories="Network;WebBrowser;"
-    local filepath="./firefox.tar.bz2"
     local iconpath="/usr/share/applications/firefox.desktop"
-    local url="https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=en-US"
 
-    download_package "$name" "$filepath" "$url"
-    install_package "$name" "$filepath" "$HOME"
+    install_package "$name" "./$package" "$url" "$directory"
     create_icon "$iconpath" "$name" "$comment" "$image" "$exec" "$type" "$categories"
 }
 
 install_oh-my-zsh() {
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
-    sed -i 's/^ZSH_THEME="robbyrussel"/ZSH_THEME="agnoster"/g' $HOME/.zshrc
+    local name="Oh-My-ZSH"
+    local url="https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh"
+
+    show_message "Installing $name"
+    sh -c "$(curl -fsSL $url)"
+    sed -i 's/^ZSH_THEME="robbyrussel"/ZSH_THEME="agnoster"/g' "$HOME/.zshrc"
 }
 
 install_vscode() {
-    wget --quiet --output-document=./vscode.deb "https://go.microsoft.com/fwlink/?LinkID=760868"
-    sudo apt-get install -y ./vscode.deb
+    local name="VSCode"
+    local package="vscode.deb"
+    local url="https://go.microsoft.com/fwlink/?LinkID=760868"
+
+    install_package "$name" "./$package" "$url"
 }
 
 install_nomachine() {
     local name="NoMachine"
-    local filepath=./nomachine.deb
+    local package="nomachine.deb"
     local url="https://download.nomachine.com/download/6.7/Linux/nomachine_6.7.6_11_amd64.deb"
 
-    download_package "$name" "$filepath" "$url"
-    install_package "$name" "$filepath"``
+    install_package "$name" "./$package" "$url"
 }
 
 install_tldr() {
-    curl -o "/usr/local/bin/tldr" https://raw.githubusercontent.com/raylee/tldr/master/tldr
-    chmod +x "/usr/local/bin/tldr"
+    local name="TL;DR"
+    local package="tldr"
+    local url="https://raw.githubusercontent.com/raylee/tldr/master/tldr"
+    local directory="/usr/local/bin"
+
+    show_message "Installing $name"
+    curl -o "$directory/$package" "$url"
+    chmod +x "$directory/$package"
 }
 
 main "$@"
