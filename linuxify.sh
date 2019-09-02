@@ -68,7 +68,7 @@ main() {
         "debug") ;&
         "--debug") ;&
         "-d")
-            install_dotnetcore
+            configure_git
             ;;
         "help") ;&
         "--help") ;&
@@ -187,13 +187,14 @@ configure_git() {
     local IFS=
     local email=
     local full_name=
+    local timeout="1440"
     show_message "Configuring Git"
     #while read -r -t 0; do read -r; done
     read -r -p "Email address: " email
     read -r -p "Full name: " full_name
     git config --global user.email "$email"
     git config --global user.name "$full_name"
-    git config --global credential.helper cache
+    git config --global credential.helper "cache --timeout $timeout"
 }
 
 #configure_os() {
