@@ -65,6 +65,11 @@ main() {
         "-p")
             show_packages 
             ;;
+        "debug") ;&
+        "--debug") ;&
+        "-d")
+            install_dotnetcore
+            ;;
         "help") ;&
         "--help") ;&
         "-h")
@@ -292,7 +297,7 @@ install_azuredatastudio() {
     install_package "$name" "./$package" "$url"
 }
 
-install_dotnotecore() {
+install_dotnetcore() {
     local name=".Net Core"
     local version="2.2"
     local package="dotnet-sdk-$version"
