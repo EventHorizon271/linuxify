@@ -25,7 +25,6 @@ packages_main=(
 
 packages_backports=(
     remmina
-    tilix
     tmux
 )
 
@@ -117,9 +116,6 @@ install_packages() {
     install_vscode
     install_nomachine
     install_tldr
-
-    # Configure packages
-    configure_tilix
 
     # Update packages
     sudo apt-file update
@@ -286,12 +282,6 @@ create_icon() {
     fi
 
     printf "[Desktop Entry]\nName=%s\nComment=%s\nIcon=%s\nExec=%s\nType=%s\nCategories=%s\n" "$name" "$comment" "$image" "$exec" "$type" "$categories" | sudo tee "$filepath"
-}
-
-configure_tilix() {
-    printf '\nif [ $TILIX_ID ] || [ $VTE_VERSION ]; then\n    source /etc/profile.d/vte.sh\nfi\n' | sudo tee -a "$HOME/.bashrc" > /dev/null 2>&1
-    printf '\nif [ $TILIX_ID ] || [ $VTE_VERSION ]; then\n    source /etc/profile.d/vte.sh\nfi\n' | sudo tee -a "$HOME/.zshrc" > /dev/null 2>&1
-    sudo ln -s "/etc/profile.d/vte-2.91.sh /etc/profile.d/vte.sh"
 }
 
 install_azuredatastudio() {
