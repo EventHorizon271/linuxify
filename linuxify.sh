@@ -109,18 +109,19 @@ install_packages() {
     install_azuredatastudio
     install_dotnetcore
     install_golang
+    install_miniconda
     install_rust
 
     # Install packages not found in repositories
-    install_gotop
     install_alacritty
     install_discord
-    install_slack
     install_firefox
-    install_oh-my-zsh
-    install_vscode
+    install_gotop
     install_nomachine
+    install_oh-my-zsh
+    install_slack
     install_tldr
+    install_vscode
 
     # Update packages
     sudo apt-file update
@@ -340,6 +341,14 @@ install_go() {
     printf $shell_export | sudo tee -a "$HOME/.bashrc" > /dev/null 2>&1
     printf $shell_export | sudo tee -a "$HOME/.zshrc" > /dev/null 2>&1
     source "$filepath"
+}
+
+install_miniconda() {
+    local name="Miniconda"
+    local url="https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+
+    show_message "Installing $name"
+    curl -sSf "$url" | sh
 }
 
 install_gotop() {
