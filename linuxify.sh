@@ -8,6 +8,7 @@ packages_main=(
     cros-adapta
     fonts-powerline
     gimp
+    googler
     htop
     kodi
     locate
