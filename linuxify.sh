@@ -14,6 +14,7 @@ packages_main=(
     lxappearance
     mesa-utils
     neovim
+    smbnetfs
     zsh
 
     # Build Dependencies
