@@ -394,10 +394,15 @@ install_ddgr() {
     local version="1.7"
     local package="ddgr"
     local url="https://raw.githubusercontent.com/jarun/$package/v$version/$package"
-    local directory="/usr/local/bin"
+    local install_directory="/usr/local/bin"
+    local config_directory="$HOME/.smb"
+    local home_config="$config_directory/smbnetfs.conf"
+    local source_config="/usr/share/doc/smbnetfs-0.6.0/smbnetfs.conf.bz2"
 
-    sudo curl -o "$directory" "$url"
-    sudo chmod +x "$directory/$package"
+    sudo curl -o "$install_directory" "$url"
+    sudo chmod +x "$install_directory/$package"
+    mkdir "$config_directory"
+    bunzip2 -c "$source_config" > "$home_config"
 }
 
 install_googler() {
