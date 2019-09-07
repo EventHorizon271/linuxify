@@ -8,7 +8,6 @@ packages_main=(
     cros-adapta
     fonts-powerline
     gimp
-    googler
     htop
     kodi
     locate
@@ -117,8 +116,10 @@ install_packages() {
 
     # Install packages not found in repositories
     install_alacritty
+    install_ddgr
     install_discord
     install_firefox
+    install_googler
     install_gotop
     install_nomachine
     install_oh-my-zsh
@@ -386,6 +387,28 @@ install_alacritty() {
     sudo update-desktop-database
     sed -i 's/^Exec=alacritty$/Exec=env WAYLAND_DISPLAY= alacritty/g' /usr/share/applications/alacritty.desktop
     cd ..
+}
+
+install_ddgr() {
+    local name="DuckDuckGo (ddgr)"
+    local version="1.7"
+    local package="ddgr"
+    local url="https://raw.githubusercontent.com/jarun/$package/v$version/$package"
+    local directory="/usr/local/bin"
+
+    sudo curl -o "$directory" "$url"
+    sudo chmod +x "$directory/$package"
+}
+
+install_googler() {
+    local name="Googler"
+    local version="3.9"
+    local package="googler"
+    local url="https://raw.githubusercontent.com/jarun/$package/v$version/$package"
+    local directory="/usr/local/bin"
+
+    sudo curl -o "$directory" "$url"
+    sudo chmod +x "$directory/$package"
 }
 
 install_discord() {
