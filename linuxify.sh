@@ -223,7 +223,6 @@ configure_smbnetfs() {
     local smbnetfs_config="/etc/smbnetfs/smbnetfs.conf"
     local smbnetfs_auth="$config_directory/smbnetfs.auth"
     local smb_config="/etc/samba/smb.conf"
-    local hostname="10.0.0.23"
     local mountpoint="$HOME/.mnt"
 
     mkdir "$config_directory"
