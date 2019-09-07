@@ -127,6 +127,9 @@ install_packages() {
     install_tldr
     install_vscode
 
+    # Configure packages
+    configure_smbnetfs
+
     # Update packages
     sudo apt-file update
     sudo update-command-not-found
@@ -214,6 +217,23 @@ configure_git() {
 #configure_environment() {
 #    #TODO: Add aliases to .bashrc and .zshrc
 #}
+
+configure_smbnetfs() {
+    local config_directory="$HOME/.smb"
+    local smbnetfs_config="/etc/smbnetfs/smbnetfs.conf"
+    local smbnetfs_auth="$config_directory/smbnetfs.auth"
+    local smb_config="/etc/samba/smb.conf"
+    local hostname="10.0.0.23"
+    local mountpoint="$HOME/.mnt"
+
+    mkdir "$config_directory"
+    cp "$smbnetfs_config" "$config_directory"
+    cp "$smb_config" "$config_directory"
+    printf "auth $hostname guest \"\"\n" | tee -a "$smbnetfs_auth" > /dev/null 2>&1
+    chmod 600 "$smbnetfs_auth"
+    mkdir "$mountpoint"
+    smbnetfs "$mountpoint"
+}
 
 update_os() {
     show_message "Updating OS"
@@ -342,8 +362,8 @@ install_go() {
     show_message "Installing $name"
     download_package "$name" "./$package" "$url"
     tar -C "$directory" -xzf "./$package"
-    printf $shell_export | sudo tee -a "$HOME/.bashrc" > /dev/null 2>&1
-    printf $shell_export | sudo tee -a "$HOME/.zshrc" > /dev/null 2>&1
+    printf $shell_export | tee -a "$HOME/.bashrc" > /dev/null 2>&1
+    printf $shell_export | tee -a "$HOME/.zshrc" > /dev/null 2>&1
     source "$filepath"
 }
 
@@ -394,15 +414,10 @@ install_ddgr() {
     local version="1.7"
     local package="ddgr"
     local url="https://raw.githubusercontent.com/jarun/$package/v$version/$package"
-    local install_directory="/usr/local/bin"
-    local config_directory="$HOME/.smb"
-    local home_config="$config_directory/smbnetfs.conf"
-    local source_config="/usr/share/doc/smbnetfs-0.6.0/smbnetfs.conf.bz2"
+    local directory="/usr/local/bin"
 
-    sudo curl -o "$install_directory" "$url"
-    sudo chmod +x "$install_directory/$package"
-    mkdir "$config_directory"
-    bunzip2 -c "$source_config" > "$home_config"
+    sudo curl -o "$directory" "$url"
+    sudo chmod +x "$directory/$package"
 }
 
 install_googler() {
