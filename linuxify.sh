@@ -9,6 +9,7 @@ packages_main=(
     fonts-powerline
     gimp
     htop
+    kodi
     locate
     lxappearance
     mesa-utils
