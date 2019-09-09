@@ -11,6 +11,7 @@ packages_main=(
     htop
     kodi
     locate
+    libreoffice
     lxappearance
     mesa-utils
     neovim
