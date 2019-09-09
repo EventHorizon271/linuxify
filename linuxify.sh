@@ -196,6 +196,7 @@ configure_git() {
     local email=
     local full_name=
     local timeout="1440"
+    
     show_message "Configuring Git"
     #while read -r -t 0; do read -r; done
     read -r -p "Email address: " email
@@ -203,6 +204,7 @@ configure_git() {
     git config --global user.email "$email"
     git config --global user.name "$full_name"
     git config --global credential.helper "cache --timeout $timeout"
+    git config --global core.editor "code --wait"
 }
 
 #configure_os() {
