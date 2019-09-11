@@ -121,7 +121,6 @@ configure_git() {
     local timeout="1440"
     
     show_message "Configuring Git"
-    #while read -r -t 0; do read -r; done
     read -r -p "Email address: " email
     read -r -p "Full name: " full_name
     git config --global user.email "$email"
@@ -407,6 +406,7 @@ install_packages() {
     install_gotop
     install_nomachine
     install_oh-my-zsh
+    install_pycharm
     install_slack
     install_tldr
     install_vscode
@@ -421,6 +421,22 @@ install_packages() {
     
     # Post-install cleanup
     rm -rf "$working_directory"
+}
+
+install_pycharm() {
+    local name="Pycharm"
+    local version="2019.2.2"
+    local package="pycharm-$version.tar.gz"
+    local url="https://download.jetbrains.com/python/pycharm-professional-$version.tar.gz"
+    local directory="$HOME/.bin"
+    local filepath="$HOME/.bin/pycharm-$version"
+    local path_export="\n# Pycharm\nexport PATH=\"$PATH:$filepath\""
+
+    show_message "Installing $name"
+    download_package "$name" "./$package" "$url"
+    tar -C "$directory" -xzf "./$package"
+    printf $path_export | tee -a "$HOME/.bashrc" > /dev/null 2>&1
+    printf $path_export | tee -a "$HOME/.zshrc" > /dev/null 2>&1
 }
 
 install_rust() {
@@ -477,7 +493,8 @@ show_message() {
 
 show_packages() {
     local IFS=$'\n'
-    local packages_sorted=($(sort <<<"${packages_all[*]}")); 
+    local packages_sorted=($(sort <<<"${packages_all[*]}"));
+
     for (( i=0; i<${#packages_sorted[@]}; i++ )); do
 	show_message "${packages_sorted[i]}"
 	sudo apt-cache show ${packages_sorted[i]}
