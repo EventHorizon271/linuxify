@@ -10,6 +10,7 @@ packages_main=(
     gimp
     htop
     kodi
+    krita
     imagemagick
     inkscape
     locate
