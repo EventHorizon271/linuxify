@@ -19,6 +19,7 @@ packages_main=(
     mesa-utils
     neovim
     smbnetfs
+    vlc
     zsh
 
     # Build Dependencies
@@ -74,7 +75,7 @@ main() {
         "debug") ;&
         "--debug") ;&
         "-d")
-            configure_git
+            install_pycharm
             ;;
         "help") ;&
         "--help") ;&
