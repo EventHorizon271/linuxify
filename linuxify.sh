@@ -10,6 +10,7 @@ packages_main=(
     gimp
     htop
     kodi
+    imagemagick
     locate
     lxappearance
     mesa-utils
