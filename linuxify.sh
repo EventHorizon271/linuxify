@@ -9,12 +9,13 @@ packages_main=(
     fonts-powerline
     gimp
     htop
-    kodi
-    krita
     imagemagick
     inkscape
+    kodi
+    krita
     locate
     lxappearance
+    mc
     mesa-utils
     neovim
     smbnetfs
