@@ -11,6 +11,7 @@ packages_main=(
     htop
     kodi
     imagemagick
+    inkscape
     locate
     lxappearance
     mesa-utils
