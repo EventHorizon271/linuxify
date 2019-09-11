@@ -430,14 +430,14 @@ install_pycharm() {
     local package="pycharm-$version.tar.gz"
     local url="https://download.jetbrains.com/python/pycharm-professional-$version.tar.gz"
     local directory="$HOME/.bin"
-    local filepath="$HOME/.bin/pycharm-$version"
-    local path_export="\n# Pycharm\nexport PATH=\"$PATH:$filepath\""
+    local filepath="$HOME/.bin/pycharm-$version/bin"
+    local path_export='\n# Pycharm\nexport PATH="$PATH:$filepath"\n'
 
     show_message "Installing $name"
     download_package "$name" "./$package" "$url"
     tar -C "$directory" -xzf "./$package"
-    printf $path_export | tee -a "$HOME/.bashrc" > /dev/null 2>&1
-    printf $path_export | tee -a "$HOME/.zshrc" > /dev/null 2>&1
+    printf "$path_export" | tee -a "$HOME/.bashrc" > /dev/null 2>&1
+    printf "$path_export" | tee -a "$HOME/.zshrc" > /dev/null 2>&1
 }
 
 install_rust() {
