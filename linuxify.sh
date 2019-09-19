@@ -19,6 +19,7 @@ packages_main=(
     mesa-utils
     neovim
     smbnetfs
+    steam
     vlc
     zsh
 
@@ -75,7 +76,7 @@ main() {
         "debug") ;&
         "--debug") ;&
         "-d")
-            install_pycharm
+            install_jetbrains-toolbox
             ;;
         "help") ;&
         "--help") ;&
@@ -130,10 +131,10 @@ configure_git() {
     git config --global core.editor "code --wait"
 }
 
-#configure_os() {
-#    configure_sources
-#    configure_environment
-#}
+configure_os() {
+    configure_sources
+    #configure_environment
+}
 
 configure_smbnetfs() {
     local config_directory="$HOME/.smb"
@@ -151,9 +152,12 @@ configure_smbnetfs() {
     smbnetfs "$mountpoint"
 }
 
-#configure_sources() {
-#    #TODO: Add contrib and non-free to repos
-#}
+configure_sources() {
+    local source_file="/etc/apt/sources.list"
+
+    sudo dpkg --add-architecture i386
+    sudo sed -i 's/main/main contrib non-free/g' "$source_file"
+}
 
 create_icon() {
     if [[ $# -lt 1 ]] && [[ $# -gt 7 ]]; then
@@ -173,7 +177,7 @@ create_icon() {
         sudo rm -f "$filepath"
     fi
 
-    printf "[Desktop Entry]\nName=%s\nComment=%s\nIcon=%s\nExec=%s\nType=%s\nCategories=%s\n" "$name" "$comment" "$image" "$exec" "$type" "$categories" | sudo tee "$filepath"
+    printf "[Desktop Entry]\nName=%s\nComment=%s\nIcon=%s\nExec=%s\nType=%s\nCategories=%s\n" "$name" "$comment" "$image" "$exec" "$type" "$categories" | sudo tee "$filepath" > /dev/null 2>&1
 }
 
 download_package() {
@@ -220,8 +224,8 @@ install_alacritty() {
     sudo cp target/release/alacritty /usr/local/bin
     sudo cp extra/logo/alacritty-term.svg /usr/share/pixmaps/Alacritty.svg
     sudo desktop-file-install extra/linux/alacritty.desktop
-    sudo update-desktop-database
     sed -i 's/^Exec=alacritty$/Exec=env WAYLAND_DISPLAY= alacritty/g' /usr/share/applications/alacritty.desktop
+    sudo update-desktop-database
     cd ..
 }
 
@@ -424,6 +428,26 @@ install_packages() {
     rm -rf "$working_directory"
 }
 
+install_jetbrains-toolbox() {
+    local name="JetBrains Toolbox"
+    local version="1.15.5796"
+    local package="jetbrains-toolbox-$version"
+    local url="https://download.jetbrains.com/toolbox/jetbrains-toolbox-1.15.5796.tar.gz"
+    #local directory=""
+    local filepath="$HOME/.local/share/JetBrains/Toolbox"
+    local shortcut="$HOME/.local/share/applications/jetbrains-toolbox.desktop"
+    local icon="$filepath/toolbox"
+    #local path_export='\n# JetBrains Toolbox\nexport PATH="$PATH:'"$filepath\""
+    local icon_fix='s/toolbox.svg/toolbox.png/g'
+
+    show_message "Installing $name"
+    download_package "$name" "./$package.tar.gz" "$url"
+    tar -xzf "./$package.tar.gz"
+    mv "./$package/jetbrains-toolbox" "$HOME"
+    inkscape -z -e "$icon.png" -w 1024 -h 1024 "$icon.svg"
+    sed -i "$icon_fix" "$shortcut"
+}
+
 install_pycharm() {
     local name="Pycharm"
     local version="2019.2.2"
@@ -431,13 +455,22 @@ install_pycharm() {
     local url="https://download.jetbrains.com/python/pycharm-professional-$version.tar.gz"
     local directory="$HOME/.bin"
     local filepath="$HOME/.bin/pycharm-$version/bin"
-    local path_export='\n# Pycharm\nexport PATH="$PATH:$filepath"\n'
+    local path_export='\n# Pycharm\nexport PATH="$PATH:'"$filepath\""
+
+    local comment="JetBrains Python IDE"
+    local image="$filepath/pycharm.png"
+    local exec="$filepath/pycharm"
+    local type="Application"
+    local categories="Development;"
+    local iconpath="/usr/share/applications/pycharm.desktop"
 
     show_message "Installing $name"
     download_package "$name" "./$package" "$url"
     tar -C "$directory" -xzf "./$package"
+    ln -s "$filepath/pycharm.sh" "$filepath/pycharm"
     printf "$path_export" | tee -a "$HOME/.bashrc" > /dev/null 2>&1
     printf "$path_export" | tee -a "$HOME/.zshrc" > /dev/null 2>&1
+    create_icon "$iconpath" "$name" "$comment" "$image" "$exec" "$type" "$categories"
 }
 
 install_rust() {
