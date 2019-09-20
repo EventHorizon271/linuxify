@@ -301,7 +301,7 @@ install_golang() {
 
     show_message "Installing $name"
     download_package "$name" "./$package" "$url"
-    tar -C "$directory" -xzf "./$package"
+    sudo tar -C "$directory" -xzf "./$package"
     printf $shell_export | tee -a "$HOME/.bashrc" > /dev/null 2>&1
     printf $shell_export | tee -a "$HOME/.zshrc" > /dev/null 2>&1
     source "$filepath"
