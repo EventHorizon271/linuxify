@@ -437,7 +437,7 @@ install_pycharm() {
 
     show_message "Installing $name"
     download_package "$name" "./$package" "$url"
-    mkdir "$directory"
+    mkdir "$HOME/.local" && mkdir "$directory"
     tar -C "$directory" -xzf "./$package"
     ln -s "$filepath/pycharm.sh" "$filepath/pycharm"
     printf "$path_export" | tee -a "$HOME/.bashrc" > /dev/null 2>&1
