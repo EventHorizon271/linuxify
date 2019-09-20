@@ -59,7 +59,7 @@ main() {
         "-i")
             configure_git
             change_passwords
-            #configure_os
+            configure_os
             update_os
             install_packages
             ;;
@@ -389,7 +389,6 @@ install_packages() {
     cd "$working_directory"
 
     # Install packages
-    sudo apt-get install -y apt-utils
     sudo apt-get remove -y ${packages_uninstall[@]}
     sudo apt-get autoremove
     sudo apt-get install -y ${packages_main[@]}
@@ -553,6 +552,7 @@ uninstall_packages() {
 update_os() {
     show_message "Updating OS"
     sudo apt-get update
+    sudo apt-get -y install apt-utils
     sudo apt-get -y full-upgrade
 }
 
