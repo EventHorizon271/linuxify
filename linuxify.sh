@@ -270,7 +270,7 @@ install_dotnetcore() {
     sudo chown root:root /etc/apt/sources.list.d/microsoft-prod.list
     sudo apt-get install apt-transport-https
     sudo apt-get update
-    sudo apt-get install "$package"
+    sudo apt-get install -y "$package"
 }
 
 install_firefox() {
