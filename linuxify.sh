@@ -390,7 +390,7 @@ install_packages() {
 
     # Install packages
     sudo apt-get remove -y ${packages_uninstall[@]}
-    sudo apt-get autoremove
+    sudo apt-get autoremove -y
     sudo apt-get install -y ${packages_main[@]}
     sudo apt-get install -t stretch-backports -y ${packages_backports[@]}
 
