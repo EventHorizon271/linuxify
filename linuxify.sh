@@ -334,14 +334,6 @@ install_gotop() {
     cd ..
 }
 
-install_miniconda() {
-    local name="Miniconda"
-    local url="https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
-
-    show_message "Installing $name"
-    curl -sSf "$url" | sh
-}
-
 install_nomachine() {
     local name="NoMachine"
     local package="nomachine.deb"
@@ -398,7 +390,7 @@ install_packages() {
     install_azuredatastudio
     install_dotnetcore
     install_golang
-    install_miniconda
+    install_jetbrains-toolbox
     install_rust
 
     # Install packages not found in repositories
@@ -445,31 +437,6 @@ install_jetbrains-toolbox() {
     mv "./$package/jetbrains-toolbox" "$HOME"
     inkscape -z -e "$icon.png" -w 1024 -h 1024 "$icon.svg"
     sed -i "$icon_fix" "$shortcut"
-}
-
-install_pycharm() {
-    local name="Pycharm"
-    local version="2019.2.2"
-    local package="pycharm-$version.tar.gz"
-    local url="https://download.jetbrains.com/python/pycharm-professional-$version.tar.gz"
-    local directory="$HOME/.bin"
-    local filepath="$HOME/.bin/pycharm-$version/bin"
-    local path_export='\n# Pycharm\nexport PATH="$PATH:'"$filepath\""
-
-    local comment="JetBrains Python IDE"
-    local image="$filepath/pycharm.png"
-    local exec="$filepath/pycharm"
-    local type="Application"
-    local categories="Development;"
-    local iconpath="/usr/share/applications/pycharm.desktop"
-
-    show_message "Installing $name"
-    download_package "$name" "./$package" "$url"
-    tar -C "$directory" -xzf "./$package"
-    ln -s "$filepath/pycharm.sh" "$filepath/pycharm"
-    printf "$path_export" | tee -a "$HOME/.bashrc" > /dev/null 2>&1
-    printf "$path_export" | tee -a "$HOME/.zshrc" > /dev/null 2>&1
-    create_icon "$iconpath" "$name" "$comment" "$image" "$exec" "$type" "$categories"
 }
 
 install_rust() {
