@@ -76,7 +76,7 @@ main() {
         "debug") ;&
         "--debug") ;&
         "-d")
-            install_jetbrains-toolbox
+            install_pycharm
             ;;
         "help") ;&
         "--help") ;&
@@ -390,7 +390,7 @@ install_packages() {
     install_azuredatastudio
     install_dotnetcore
     install_golang
-    install_jetbrains-toolbox
+    install_pycharm
     install_rust
 
     # Install packages not found in repositories
@@ -419,24 +419,30 @@ install_packages() {
     rm -rf "$working_directory"
 }
 
-install_jetbrains-toolbox() {
-    local name="JetBrains Toolbox"
-    local version="1.15.5796"
-    local package="jetbrains-toolbox-$version"
-    local url="https://download.jetbrains.com/toolbox/jetbrains-toolbox-1.15.5796.tar.gz"
-    #local directory=""
-    local filepath="$HOME/.local/share/JetBrains/Toolbox"
-    local shortcut="$HOME/.local/share/applications/jetbrains-toolbox.desktop"
-    local icon="$filepath/toolbox"
-    #local path_export='\n# JetBrains Toolbox\nexport PATH="$PATH:'"$filepath\""
-    local icon_fix='s/toolbox.svg/toolbox.png/g'
+install_pycharm() {
+    local name="Pycharm"
+    local version="2019.2.2"
+    local package="pycharm-$version.tar.gz"
+    local url="https://download.jetbrains.com/python/pycharm-professional-$version.tar.gz"
+    local directory="$HOME/.local/bin"
+    local filepath="$directory/pycharm-$version/bin"
+    local path_export='\n# Pycharm\nexport PATH="$PATH:'"$filepath\""
+
+    local comment="JetBrains Python IDE"
+    local image="$filepath/pycharm.png"
+    local exec="$filepath/pycharm"
+    local type="Application"
+    local categories="Development;"
+    local iconpath="/usr/share/applications/pycharm.desktop"
 
     show_message "Installing $name"
-    download_package "$name" "./$package.tar.gz" "$url"
-    tar -xzf "./$package.tar.gz"
-    mv "./$package/jetbrains-toolbox" "$HOME"
-    inkscape -z -e "$icon.png" -w 1024 -h 1024 "$icon.svg"
-    sed -i "$icon_fix" "$shortcut"
+    download_package "$name" "./$package" "$url"
+    mkdir "$directory"
+    tar -C "$directory" -xzf "./$package"
+    ln -s "$filepath/pycharm.sh" "$filepath/pycharm"
+    printf "$path_export" | tee -a "$HOME/.bashrc" > /dev/null 2>&1
+    printf "$path_export" | tee -a "$HOME/.zshrc" > /dev/null 2>&1
+    create_icon "$iconpath" "$name" "$comment" "$image" "$exec" "$type" "$categories"
 }
 
 install_rust() {
