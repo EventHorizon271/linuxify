@@ -224,7 +224,7 @@ install_alacritty() {
     sudo cp target/release/alacritty /usr/local/bin
     sudo cp extra/logo/alacritty-term.svg /usr/share/pixmaps/Alacritty.svg
     sudo desktop-file-install extra/linux/alacritty.desktop
-    sed -i 's/^Exec=alacritty$/Exec=env WAYLAND_DISPLAY= alacritty/g' /usr/share/applications/alacritty.desktop
+    sudo sed -i 's/^Exec=alacritty$/Exec=env WAYLAND_DISPLAY= alacritty/g' /usr/share/applications/alacritty.desktop
     sudo update-desktop-database
     cd ..
 }
@@ -244,7 +244,8 @@ install_ddgr() {
     local url="https://raw.githubusercontent.com/jarun/$package/v$version/$package"
     local directory="/usr/local/bin"
 
-    sudo curl -o "$directory" "$url"
+    show_message "Installing $name"
+    sudo curl -o "$directory/$package" "$url"
     sudo chmod +x "$directory/$package"
 }
 
@@ -314,6 +315,7 @@ install_googler() {
     local url="https://raw.githubusercontent.com/jarun/$package/v$version/$package"
     local directory="/usr/local/bin"
 
+    show_message "Installing $name"
     sudo curl -o "$directory" "$url"
     sudo chmod +x "$directory/$package"
 }
