@@ -18,6 +18,7 @@ packages_main=(
     mc
     mesa-utils
     neovim
+    samba
     smbnetfs
     steam
     vlc
@@ -76,7 +77,7 @@ main() {
         "debug") ;&
         "--debug") ;&
         "-d")
-            install_pycharm
+            install_alacritty
             ;;
         "help") ;&
         "--help") ;&
@@ -138,18 +139,29 @@ configure_os() {
 
 configure_smbnetfs() {
     local config_directory="$HOME/.smb"
-    local smbnetfs_config="/etc/smbnetfs/smbnetfs.conf"
+    local smbnetfs_config="/etc/smbnetfs.conf"
     local smbnetfs_auth="$config_directory/smbnetfs.auth"
     local smb_config="/etc/samba/smb.conf"
     local mountpoint="$HOME/.mnt"
+    
+    # User-specific configs
+    local server="10.0.0.23"
+    local uid="1000"
+    local gid="1000"
+    local samba_directory="$HOME/Samba"
+    local mount_directory="$mountpoint/$server/Elements"
+    local link_directory="$samba_directory/Titan"
 
     mkdir "$config_directory"
     cp "$smbnetfs_config" "$config_directory"
     cp "$smb_config" "$config_directory"
-    printf "auth $hostname guest \"\"\n" | tee -a "$smbnetfs_auth" > /dev/null 2>&1
+    printf "auth $server guest \"\"\n" | tee -a "$smbnetfs_auth" > /dev/null 2>&1
     chmod 600 "$smbnetfs_auth"
     mkdir "$mountpoint"
-    smbnetfs "$mountpoint"
+
+    smbnetfs -o uid="$uid" -o gid="$gid" "$mountpoint"
+    mkdir "$samba_directory"
+    ln -s "$mount_directory" "$link_directory"
 }
 
 configure_sources() {
@@ -216,15 +228,20 @@ install_alacritty() {
     local package="alacritty"
     local url="https://github.com/jwilm/alacritty.git"
     local directory="/usr/local/bin"
+    local icon="\/usr\/share\/pixmaps\/alacritty.png"
+    local desktop="/usr/share/applications/alacritty.desktop"
+    local exec_fix="s/^Exec=alacritty$/Exec=env WAYLAND_DISPLAY= alacritty/g"
+    local icon_fix="s/^Icon=Alacritty$/Icon=$icon/g"
 
     show_message "Installing $name"
     download_source "$name" "$url"
     cd "$package"
     cargo build --release
-    sudo cp target/release/alacritty /usr/local/bin
-    sudo cp extra/logo/alacritty-term.svg /usr/share/pixmaps/Alacritty.svg
+    sudo cp target/release/alacritty "$directory"
+    sudo inkscape -z extra/logo/alacritty-term.svg -e "$icon"
     sudo desktop-file-install extra/linux/alacritty.desktop
-    sudo sed -i 's/^Exec=alacritty$/Exec=env WAYLAND_DISPLAY= alacritty/g' /usr/share/applications/alacritty.desktop
+    sudo sed -i "$exec_fix" "$desktop"
+    sudo sed -i "$icon_fix" "$desktop"
     sudo update-desktop-database
     cd ..
 }
@@ -285,10 +302,10 @@ install_firefox() {
     local exec="env MOZ_USE_XINPUT2=1 /home/$(whoami)/firefox/firefox %u"
     local type="Application"
     local categories="Network;WebBrowser;"
-    local iconpath="/usr/share/applications/firefox.desktop"
+    local desktop="/usr/share/applications/firefox.desktop"
 
     install_package "$name" "./$package" "$url" "$directory"
-    create_icon "$iconpath" "$name" "$comment" "$image" "$exec" "$type" "$categories"
+    create_icon "$desktop" "$name" "$comment" "$image" "$exec" "$type" "$categories"
 }
 
 install_golang() {
@@ -323,23 +340,25 @@ install_googler() {
 install_gotop() {
     local name="GoTop"
     local package="gotop"
-    local installer="scripts/download.sh"
+    local installer="download.sh"
     local url="https://github.com/cjbassi/gotop"
     local directory="/usr/local/bin"
     local depth="1"
 
     show_message "Installing $name"
     download_source "$name" "$url" "$depth"
-    cd "$package"
-    sh "$installer"
-    mv "$package" "$directory"
-    cd ..
+    cd "$package/scripts"
+    "./$installer"
+    sudo mv "$package" "$directory"
+    cd ../..
 }
 
 install_nomachine() {
     local name="NoMachine"
+    local version_major="6.8"
+    local version_minor="1_1"
     local package="nomachine.deb"
-    local url="https://download.nomachine.com/download/6.7/Linux/nomachine_6.7.6_11_amd64.deb"
+    local url="https://download.nomachine.com/download/$version_major/Linux/nomachine_$version_major.$version_minor""_amd64.deb"
 
     install_package "$name" "./$package" "$url"
 }
@@ -434,7 +453,7 @@ install_pycharm() {
     local exec="$filepath/pycharm"
     local type="Application"
     local categories="Development;"
-    local iconpath="/usr/share/applications/pycharm.desktop"
+    local desktop="/usr/share/applications/pycharm.desktop"
 
     show_message "Installing $name"
     download_package "$name" "./$package" "$url"
@@ -443,7 +462,7 @@ install_pycharm() {
     ln -s "$filepath/pycharm.sh" "$filepath/pycharm"
     printf "$path_export" | tee -a "$HOME/.bashrc" > /dev/null 2>&1
     printf "$path_export" | tee -a "$HOME/.zshrc" > /dev/null 2>&1
-    create_icon "$iconpath" "$name" "$comment" "$image" "$exec" "$type" "$categories"
+    create_icon "$desktop" "$name" "$comment" "$image" "$exec" "$type" "$categories"
 }
 
 install_rust() {
@@ -471,8 +490,8 @@ install_tldr() {
     local directory="/usr/local/bin"
 
     show_message "Installing $name"
-    curl -o "$directory/$package" "$url"
-    chmod +x "$directory/$package"
+    sudo curl -o "$directory/$package" "$url"
+    sudo chmod +x "$directory/$package"
 }
 
 install_vscode() {
