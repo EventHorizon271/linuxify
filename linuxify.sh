@@ -323,7 +323,7 @@ install_googler() {
 install_gotop() {
     local name="GoTop"
     local package="gotop"
-    local installer="./download.sh"
+    local installer="scripts/download.sh"
     local url="https://github.com/cjbassi/gotop"
     local directory="/usr/local/bin"
     local depth="1"
@@ -332,7 +332,7 @@ install_gotop() {
     download_source "$name" "$url" "$depth"
     cd "$package"
     sh "$installer"
-    mv "./$package" "$directory"
+    mv "$package" "$directory"
     cd ..
 }
 
