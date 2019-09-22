@@ -228,10 +228,10 @@ install_alacritty() {
     local package="alacritty"
     local url="https://github.com/jwilm/alacritty.git"
     local directory="/usr/local/bin"
-    local icon="\/usr\/share\/pixmaps\/alacritty.png"
+    local icon="/usr/share/pixmaps/alacritty.png"
     local desktop="/usr/share/applications/alacritty.desktop"
     local exec_fix="s/^Exec=alacritty$/Exec=env WAYLAND_DISPLAY= alacritty/g"
-    local icon_fix="s/^Icon=Alacritty$/Icon=$icon/g"
+    local icon_fix="s/^Icon=Alacritty$/Icon=\/usr\/share\/pixmaps\/alacritty.png/g"
 
     show_message "Installing $name"
     download_source "$name" "$url"
@@ -369,7 +369,7 @@ install_oh-my-zsh() {
 
     show_message "Installing $name"
     sh -c "$(curl -fsSL $url)"
-    sed -i 's/^ZSH_THEME="robbyrussel"/ZSH_THEME="agnoster"/g' "$HOME/.zshrc"
+    sed -i 's/^ZSH_THEME="robbyrussell"$/ZSH_THEME="agnoster"/g' "$HOME/.zshrc"
 }
 
 install_package() {
