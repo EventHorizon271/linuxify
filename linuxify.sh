@@ -316,7 +316,7 @@ install_googler() {
     local directory="/usr/local/bin"
 
     show_message "Installing $name"
-    sudo curl -o "$directory" "$url"
+    sudo curl -o "$directory/$package" "$url"
     sudo chmod +x "$directory/$package"
 }
 
@@ -404,7 +404,6 @@ install_packages() {
     install_gotop
     install_nomachine
     install_oh-my-zsh
-    install_pycharm
     install_slack
     install_tldr
     install_vscode
